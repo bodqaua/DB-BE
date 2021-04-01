@@ -18,7 +18,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 $user = $_POST['username'];
 $pass = $_POST['password'];
+$database = $_POST['database'];
+$column = $_POST['column'];
 
 $PDO = new DatabaseDriver($user, $pass);
-$PDO->connect();
-
+//$PDO->getDatabases();
+//$PDO->getDatabaseColumns($database);
+$PDO->getDataFromColumn($database, $column);

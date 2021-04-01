@@ -15,5 +15,6 @@ class Serializer
             "status" => $status,
             "message" => $message
         ]);
+        exit($status);
     }
 }
