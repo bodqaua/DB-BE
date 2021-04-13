@@ -27,37 +27,43 @@ class DatabaseDriver
         }
     }
 
-    public function getDatabases() {
+    public function getDatabases()
+    {
         return $this->PDO->query('SHOW DATABASES')->fetchAll(PDO::FETCH_COLUMN);
     }
 
-    public function getDatabaseColumns($database) {
+    public function getDatabaseColumns($database)
+    {
         $query = $this->PDO->query('SHOW TABLES FROM ' . $database);
         $this->throwQueryErrorIfExists($query);
         return $query->fetchAll(PDO::FETCH_COLUMN);
     }
 
-    public function getColumnsDescription($database, $column) {
+    public function getColumnsDescription($database, $column)
+    {
         $this->PDO->exec("use " . $database);
         $query = $this->PDO->query('SHOW COLUMNS FROM ' . $column);
         $this->throwQueryErrorIfExists($query);
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getDataFromColumn($database, $column) {
+    public function getDataFromColumn($database, $column)
+    {
         $this->PDO->exec("use " . $database);
         $query = $this->PDO->query('SELECT * FROM ' . $column);
         $this->throwQueryErrorIfExists($query);
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function createDatabase($databaseName) {
+    public function createDatabase($databaseName)
+    {
         $query = $this->PDO->exec('CREATE DATABASE ' . $databaseName);
         $this->throwQueryErrorIfExists($query);
 
     }
 
-    public function dropDatabase($databaseName) {
+    public function dropDatabase($databaseName)
+    {
         $query = $this->PDO->query('DROP DATABASE ' . $databaseName);
         $this->throwQueryErrorIfExists($query);
 
@@ -72,39 +78,85 @@ class DatabaseDriver
      * PRIMARY KEY (`id`)) ENGINE = InnoDB;
      */
 
-    public function createTable($database, $table, $fields) {
+    public function createTable($database, $table, $fields)
+    {
+        $this->PDO->exec("use " . $database);
         $tableQuery = $this->generateTableQuery($fields);
         $queryString = "CREATE TABLE " . "`" . $database . "`." . "`" . $table . "`" . "(" . $tableQuery . " PRIMARY KEY (`id`)) ENGINE = InnoDB";
         $query = $this->PDO->exec($queryString);
         $this->throwQueryErrorIfExists($query);
-
     }
 
-    private function generateTableQuery($fields) {
+    public function dropTable($database, $table)
+    {
+        $this->PDO->exec("use " . $database);
+        $queryString = "DROP TABLE " . $table;
+        $query = $this->PDO->exec($queryString);
+        $this->throwQueryErrorIfExists($query);
+    }
+
+    public function insert($database, $table, $data)
+    {
+        $this->PDO->exec("use " . $database);
+        $queryString = $this->generateInsert($table, $data);
+        $query = $this->PDO->exec($queryString);
+        $this->throwQueryErrorIfExists($query);
+    }
+
+    public function delete($database, $table, $id)
+    {
+        $this->PDO->exec("use " . $database);
+        $queryString = "DELETE FROM " . $table . " WHERE id = ". $id;
+        $query = $this->PDO->exec($queryString);
+        $this->throwQueryErrorIfExists($query);
+    }
+
+    private function generateTableQuery($fields)
+    {
         $query = "";
         foreach ($fields as $field) {
             $array = [];
-            array_push($array, "`" .  $field['key'] . "`");
+            array_push($array, "`" . $field['name'] . "`");
             array_push($array, $field['type']);
             array_push($array, "NOT NULL");
-            array_push($array, $field['ai'] ? 'AUTO_INCREMENT' : '');
+            array_push($array, $field['autoIncrement'] ? 'AUTO_INCREMENT' : '');
             $query .= implode(" ", $array) . ",";
         }
 
         return trim($query);
     }
 
-    private function throwQueryErrorIfExists($query) {
+    private function generateInsert($table, $data)
+    {
+        $keys = [];
+        $values = [];
+        foreach ($data as $key => $value) {
+            array_push($keys, "`" . $key . "`");
+            array_push($values, "'" . $value . "'");
+        }
+
+        return "INSERT INTO `" . $table . "` (" . $this->innerImplode($keys, ",", ",")  . ") VALUES (" . $this->innerImplode($values, ",", ",")  . ")";
+    }
+
+    private function innerImplode($array, $separator, $trim)
+    {
+        return trim(implode($separator, $array), $trim);
+    }
+
+    private function throwQueryErrorIfExists($query)
+    {
         if (!$query && $this->PDO->errorInfo()[2]) {
             Serializer::Error(400, $this->PDO->errorInfo()[2]);
         }
     }
 
-    public function toJson($data) {
+    public function toJson($data)
+    {
         $result = [];
         foreach ($data as $d) {
             array_push($result, ['name' => $d]);
         }
         return $result;
     }
+
 }

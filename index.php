@@ -27,11 +27,13 @@ $routes = [
     "databases" => "App::FetchDatabases",
     "database/:database" => "App::FetchDatabaseByName",
     "database/:database/create/:table" => "App::CreateTable",
-    "database/:database/delete/:table" => "App::DeleteTable",
+    "database/:database/delete/:table" => "App::DropTable",
     "database/create/:database" => "App::CreateDatabase",
     "database/delete/:database" => "App::DropDatabase",
     "database/:database/structure/:column" => "App::getTableColumns",
     "database/:database/:column" => "App::getDataFromColumn",
+    "database/:database/:table/insert" => "App::insertIntoColumn",
+    "database/:database/:table/delete" => "App::deleteFromColumn",
 ];
 
 $router = new Router($routes);
