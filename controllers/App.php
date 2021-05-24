@@ -89,4 +89,22 @@ class App
         $db->delete($params['database'], $params['table'], $id);
         Serializer::Json("Data has been deleted from " . $params['table']);
     }
+
+    public static function getInfoData() {
+        $db = self::Connect();
+        $data = $db->getTablesLength();
+        $databases = $db->toJson($db->getDatabases());
+        $users = $db->toJson($db->getUsers());
+        Serializer::Json([
+            "db_counter" => $data[0]['COUNT(*)'],
+            "databases" => $databases,
+            "users" => $users
+        ]);
+    }
+
+    public static function createUser($params) {
+        $db = self::Connect();
+        $data = $db->createUser($_POST['new_user_name'], $_POST['new_user_password']);
+        Serializer::Json("User created");
+    }
 }

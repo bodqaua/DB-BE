@@ -24,7 +24,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 $routes = [
     "login" => "App::Login",
+    "user" => "App::createUser",
     "databases" => "App::FetchDatabases",
+    "databases/info" => "App::getInfoData",
     "database/:database" => "App::FetchDatabaseByName",
     "database/:database/create/:table" => "App::CreateTable",
     "database/:database/delete/:table" => "App::DropTable",

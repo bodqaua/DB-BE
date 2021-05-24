@@ -32,6 +32,10 @@ class DatabaseDriver
         return $this->PDO->query('SHOW DATABASES')->fetchAll(PDO::FETCH_COLUMN);
     }
 
+    public function getUsers() {
+        return $this->PDO->query('SELECT user FROM mysql.user')->fetchAll(PDO::FETCH_COLUMN);
+    }
+
     public function getDatabaseColumns($database)
     {
         $query = $this->PDO->query('SHOW TABLES FROM ' . $database);
@@ -66,17 +70,19 @@ class DatabaseDriver
     {
         $query = $this->PDO->query('DROP DATABASE ' . $databaseName);
         $this->throwQueryErrorIfExists($query);
-
     }
 
-    /*
-     * CREATE TABLE `users`.`user`
-     * ( `id` INT NOT NULL AUTO_INCREMENT ,
-     * `name` TEXT NOT NULL ,
-     * `email` INT NOT NULL ,
-     * `last_login` INT NOT NULL ,
-     * PRIMARY KEY (`id`)) ENGINE = InnoDB;
-     */
+    public function getTablesLength() {
+        $query = $this->PDO->query('SELECT COUNT(*) FROM information_schema.SCHEMATA');
+        $this->throwQueryErrorIfExists($query);
+        return $query->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function createUser($username, $password) {
+        $query = $this->PDO->query("CREATE USER '$username'@'localhost' IDENTIFIED BY '$password'");
+        $this->throwQueryErrorIfExists($query);
+        return $query->fetchAll(PDO::FETCH_ASSOC);
+    }
 
     public function createTable($database, $table, $fields)
     {
