@@ -104,7 +104,7 @@ class App
 
     public static function createUser($params) {
         $db = self::Connect();
-        $data = $db->createUser($_POST['new_user_name'], $_POST['new_user_password']);
+        $data = $db->createUser($_POST['new_user_name'], $_POST['new_user_password'], $_POST['is_admin']);
         Serializer::Json("User created");
     }
 }

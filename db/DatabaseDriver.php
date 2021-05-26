@@ -78,8 +78,12 @@ class DatabaseDriver
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function createUser($username, $password) {
-        $query = $this->PDO->query("CREATE USER '$username'@'localhost' IDENTIFIED BY '$password'");
+    public function createUser($username, $password, $isAdmin) {
+        if ($isAdmin) {
+            $query = $this->PDO->query("CREATE USER '$username'@'%' IDENTIFIED BY '$password';GRANT ALL PRIVILEGES ON *.* TO '$username'@'%'");
+        } else {
+            $query = $this->PDO->query("CREATE USER '$username'@'%' IDENTIFIED BY '$password';GRANT SELECT ON *.* TO '$username'@'%'");
+        }
         $this->throwQueryErrorIfExists($query);
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
